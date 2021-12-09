@@ -33,7 +33,7 @@ public class Stats {
                 String.format("user_activity.bz : %15s \n", humanReadableByteCountSI(userActivityBzSize)) +
                 String.format("csv              : %15s \n", humanReadableByteCountSI(csvSize)) +
                 String.format("json             : %15s \n", humanReadableByteCountSI(jsonSize)) +
-                String.format("json             : %15s \n", humanReadableByteCountSI(jsonBzSize));
+                String.format("json.bz          : %15s \n", humanReadableByteCountSI(jsonBzSize));
     }
 
     public void registerPick(int pick, long options) {
