@@ -86,7 +86,13 @@ public class Main {
                     String clientIp = computeClientIp(clientIps);
                     String domain = computeDomain(percentUnknownSites, options);
                     eventTime = computeNextTime(eventTime, defaultMean);
-                    out.append("{ \"@timestamp\": \""+eventTime+"\", \"clientIp\": \""+clientIp+"\", \"domain\": \""+domain+"\" }\n");
+                    out.append("{ \"@timestamp\": \"")
+                        .append(String.valueOf(eventTime))
+                        .append("\", \"clientIp\": \"")
+                        .append(clientIp)
+                        .append("\", \"domain\": \"")
+                        .append(domain)
+                        .append("\" }\n");
                 }
             }
         }
@@ -94,14 +100,14 @@ public class Main {
         stats.userActivitySize = Files.size(userActivity);
 
 
-        Path jsonBz = outputDir.resolve("top10milliondomains.json.bz");
+        Path jsonBz = outputDir.resolve("top10milliondomains.json.bz2");
         if(!Files.exists(jsonBz)) {
             try (OutputStream out = new BZip2CompressorOutputStream(new BufferedOutputStream(Files.newOutputStream(jsonBz)), 1)) {
                 Files.copy(json, out);
             }
             stats.jsonBzSize = Files.size(jsonBz);
         }
-        Path userActivityBz = outputDir.resolve("user_activity.json.bz");
+        Path userActivityBz = outputDir.resolve("user_activity.json.bz2");
         if(!Files.exists(userActivityBz)) {
             try (OutputStream out = new BZip2CompressorOutputStream(new BufferedOutputStream(Files.newOutputStream(userActivityBz)), 1)) {
                 Files.copy(userActivity, out);
@@ -121,19 +127,19 @@ public class Main {
 
     private double makeUpMean(int hour, boolean isWeekend, double defaultMean) {
         if(isWeekend) {
-            switch (hour) {
-                case 17,18,19,20,21,22,23,24,0,1,2,3,4,5,6,7,8: return defaultMean *  0.15;
-                default: return defaultMean *  0.25;
-            }
+            return switch (hour) {
+                case 17, 18, 19, 20, 21, 22, 23, 24, 0, 1, 2, 3, 4, 5, 6, 7, 8 -> defaultMean * 0.15;
+                default -> defaultMean * 0.25;
+            };
 
         }
-        switch (hour) {
-            case 19,20,21,22,23,24,0,1,2,3,4,5,6,7: return defaultMean *  0.15;
-            case 12: return defaultMean *  0.8; // lunch
-            case 11,13: return defaultMean *  0.95; // early / late lunch
-            case 8,18: return defaultMean *  0.35; // working late / eary
-            default: return defaultMean * 1.2;
-        }
+        return switch (hour) {
+            case 19, 20, 21, 22, 23, 24, 0, 1, 2, 3, 4, 5, 6, 7 -> defaultMean * 0.15;
+            case 12 -> defaultMean * 0.8; // lunch
+            case 11, 13 -> defaultMean * 0.95; // early / late lunch
+            case 8, 18 -> defaultMean * 0.35; // working late / eary
+            default -> defaultMean * 1.2;
+        };
     }
 
     private Path writeCsvAsJson(Path csv) throws IOException {
